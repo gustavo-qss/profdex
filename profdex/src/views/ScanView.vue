@@ -12,9 +12,11 @@ const { loading, error, start, addAnchor } = useAR(containerRef, '/markers.mind'
 
 const foundProfessor = ref(null)
 const discovering = ref(false)
+const avatarError = ref(false)
 
 // marker1Index por professor: Mário=0, Eron=2, Gustavo=4
-const FIRST_MARKER_INDICES = [0, 2, 4]
+// Mário=0, Eron=1, Gustavo=2
+const FIRST_MARKER_INDICES = [0, 1, 2]
 
 onMounted(async () => {
   if (!store.professors.length) await store.fetch()
@@ -26,6 +28,7 @@ onMounted(async () => {
     anchor.onTargetFound = async () => {
       const professor = store.professors.find((p) => p.marker1Index === markerIndex)
       if (!professor || foundProfessor.value) return
+      avatarError.value = false
       foundProfessor.value = professor
 
       if (!professor.discovered) {
@@ -100,7 +103,15 @@ onMounted(async () => {
             </div>
 
             <div class="found-avatar">
-              <div class="found-avatar-circle">{{ foundProfessor.name[0] }}</div>
+              <img
+                v-if="!avatarError"
+                :src="`/professors/${foundProfessor.slug}-cartoon.png`"
+                :alt="foundProfessor.name"
+                class="found-avatar-img"
+                :class="{ 'found-avatar-img--shadow': !foundProfessor.captured }"
+                @error="avatarError = true"
+              />
+              <div v-else class="found-avatar-circle">{{ foundProfessor.name[0] }}</div>
               <div v-if="!foundProfessor.captured" class="found-avatar-question">?</div>
             </div>
 
@@ -288,6 +299,20 @@ onMounted(async () => {
   position: relative;
   width: 80px;
   height: 80px;
+}
+
+.found-avatar-img {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid var(--yellow);
+}
+
+.found-avatar-img--shadow {
+  filter: brightness(0) contrast(1);
+  border-color: rgba(255,255,255,0.2);
+  opacity: 0.7;
 }
 
 .found-avatar-circle {

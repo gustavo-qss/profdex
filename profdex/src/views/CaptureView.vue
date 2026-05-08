@@ -13,13 +13,13 @@ const { loading, error, start, addAnchor } = useAR(containerRef, '/markers.mind'
 const capturedProfessor = ref(null)
 const capturing = ref(false)
 const celebrating = ref(false)
+const celebrateImgError = ref(false)
 
-// Mapa de pares: [marker1Index, marker2Index] por professor
-// Deve bater com os dados do backend: Mário(0,1), Eron(2,3), Gustavo(4,5)
+// Pares [marker1Index, marker2Index] — Mário(0,4), Eron(1,5), Gustavo(2,3)
 const MARKER_PAIRS = [
-  [0, 1],
+  [0, 4],
+  [1, 5],
   [2, 3],
-  [4, 5],
 ]
 
 onMounted(async () => {
@@ -53,6 +53,7 @@ onMounted(async () => {
 
 async function triggerCapture(professor) {
   capturing.value = true
+  celebrateImgError.value = false
   capturedProfessor.value = professor
   try {
     await store.capture(professor.id)
@@ -139,6 +140,16 @@ function finish() {
           <div class="celebrate-card">
             <div class="celebrate-emoji">🎉</div>
             <div class="pixel celebrate-title">CAPTURADO!</div>
+            <div class="celebrate-avatar">
+              <img
+                v-if="!celebrateImgError"
+                :src="`/professors/${capturedProfessor.slug}-cartoon.png`"
+                :alt="capturedProfessor.name"
+                class="celebrate-img"
+                @error="celebrateImgError = true"
+              />
+              <div v-else class="celebrate-fallback">{{ capturedProfessor.name[0] }}</div>
+            </div>
             <div class="celebrate-prof-name">Prof. {{ capturedProfessor.name }}</div>
             <p style="font-size: 13px; color: var(--text-muted); text-align: center; line-height: 1.6">
               O Prof. <strong>{{ capturedProfessor.name }}</strong> foi adicionado ao seu ProfDex!
@@ -374,6 +385,37 @@ function finish() {
   color: var(--yellow);
   text-shadow: 2px 2px 0 rgba(0,0,0,0.5);
   letter-spacing: 2px;
+}
+
+.celebrate-avatar {
+  width: 96px;
+  height: 96px;
+  position: relative;
+}
+
+.celebrate-img {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid var(--yellow);
+  box-shadow: 0 0 24px rgba(255, 222, 0, 0.4);
+  animation: pulse 1s ease-in-out infinite;
+}
+
+.celebrate-fallback {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  background: var(--red);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 42px;
+  font-weight: 900;
+  color: white;
+  border: 3px solid var(--yellow);
+  animation: pulse 1s ease-in-out infinite;
 }
 
 .celebrate-prof-name {

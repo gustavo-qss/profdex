@@ -1,5 +1,7 @@
 <script setup>
-defineProps({
+import { ref } from 'vue'
+
+const props = defineProps({
   professor: {
     type: Object,
     required: true,
@@ -10,7 +12,8 @@ defineProps({
   },
 })
 
-const COLORS = ['#e74c3c', '#3498db', '#2ecc71']
+const imgError = ref(false)
+const cartoonSrc = `/professors/${props.professor.slug}-cartoon.png`
 </script>
 
 <template>
@@ -29,15 +32,29 @@ const COLORS = ['#e74c3c', '#3498db', '#2ecc71']
 
       <div class="prof-card__avatar">
         <template v-if="professor.captured">
-          <div class="avatar-circle" :style="{ background: COLORS[index % COLORS.length] }">
-            <span class="avatar-initial">{{ professor.name[0] }}</span>
+          <img
+            v-if="!imgError"
+            :src="cartoonSrc"
+            :alt="professor.name"
+            class="avatar-img"
+            @error="imgError = true"
+          />
+          <div v-else class="avatar-fallback" :style="{ background: `hsl(${index * 110}, 60%, 40%)` }">
+            {{ professor.name[0] }}
           </div>
           <div class="captured-badge">✓</div>
         </template>
 
         <template v-else-if="professor.discovered">
-          <div class="avatar-circle avatar-shadow">
-            <span class="avatar-initial">?</span>
+          <img
+            v-if="!imgError"
+            :src="cartoonSrc"
+            :alt="professor.name"
+            class="avatar-img avatar-img--shadow"
+            @error="imgError = true"
+          />
+          <div v-else class="avatar-fallback avatar-fallback--shadow">
+            {{ professor.name[0] }}
           </div>
           <div class="discovered-badge">!</div>
         </template>
@@ -51,9 +68,7 @@ const COLORS = ['#e74c3c', '#3498db', '#2ecc71']
 
       <div class="prof-card__name">
         <span v-if="professor.captured">{{ professor.name }}</span>
-        <span v-else-if="professor.discovered" class="name-shadow">
-          {{ professor.name.replace(/./g, '?') }}
-        </span>
+        <span v-else-if="professor.discovered" class="name-blur">████████</span>
         <span v-else class="pixel" style="font-size: 8px; color: var(--text-muted)">???</span>
       </div>
 
@@ -72,8 +87,7 @@ const COLORS = ['#e74c3c', '#3498db', '#2ecc71']
   border: 2px solid var(--border);
   background: var(--bg-card);
   overflow: hidden;
-  transition: transform 0.15s, border-color 0.15s;
-  cursor: default;
+  transition: transform 0.15s, border-color 0.15s, box-shadow 0.15s;
 }
 
 .prof-card--captured {
@@ -81,12 +95,8 @@ const COLORS = ['#e74c3c', '#3498db', '#2ecc71']
   box-shadow: 0 0 16px rgba(255, 222, 0, 0.2);
 }
 
-.prof-card--discovered {
-  border-color: #3a3a6a;
-}
-
 .prof-card__inner {
-  padding: 16px 12px;
+  padding: 14px 10px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -94,7 +104,7 @@ const COLORS = ['#e74c3c', '#3498db', '#2ecc71']
 }
 
 .prof-card__num {
-  font-size: 8px;
+  font-size: 7px;
   color: var(--text-muted);
   align-self: flex-start;
 }
@@ -112,7 +122,21 @@ const COLORS = ['#e74c3c', '#3498db', '#2ecc71']
   justify-content: center;
 }
 
-.avatar-circle {
+.avatar-img {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--yellow);
+}
+
+.avatar-img--shadow {
+  filter: brightness(0) contrast(1);
+  border-color: var(--border);
+  opacity: 0.6;
+}
+
+.avatar-fallback {
   width: 64px;
   height: 64px;
   border-radius: 50%;
@@ -123,11 +147,12 @@ const COLORS = ['#e74c3c', '#3498db', '#2ecc71']
   font-size: 28px;
   color: white;
   text-shadow: 1px 1px 0 rgba(0,0,0,0.3);
+  border: 2px solid var(--yellow);
 }
 
-.avatar-shadow {
-  background: #2a2a4a !important;
-  filter: brightness(0.3);
+.avatar-fallback--shadow {
+  filter: brightness(0.25);
+  border-color: var(--border);
 }
 
 .avatar-unknown {
@@ -154,7 +179,7 @@ const COLORS = ['#e74c3c', '#3498db', '#2ecc71']
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 12px;
+  font-size: 11px;
   color: var(--bg);
   font-weight: 900;
 }
@@ -177,15 +202,16 @@ const COLORS = ['#e74c3c', '#3498db', '#2ecc71']
 }
 
 .prof-card__name {
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 700;
   text-align: center;
   min-height: 18px;
 }
 
-.name-shadow {
-  color: var(--text-muted);
-  filter: blur(3px);
+.name-blur {
+  color: transparent;
+  text-shadow: 0 0 8px rgba(255,255,255,0.35);
+  letter-spacing: -1px;
   user-select: none;
 }
 
@@ -194,15 +220,7 @@ const COLORS = ['#e74c3c', '#3498db', '#2ecc71']
   letter-spacing: 0.5px;
 }
 
-.status-captured {
-  color: var(--yellow);
-}
-
-.status-discovered {
-  color: var(--red-light);
-}
-
-.status-unknown {
-  color: var(--text-muted);
-}
+.status-captured { color: var(--yellow); }
+.status-discovered { color: var(--red-light); }
+.status-unknown { color: var(--text-muted); }
 </style>

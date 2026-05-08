@@ -16,8 +16,7 @@ export default defineConfig({
     },
   },
   server: {
-    // HTTPS necessário para câmera em dispositivos físicos (não localhost)
-    // Para testar no celular via rede local: vite --host
     host: true,
+    allowedHosts: true,
   },
 })
