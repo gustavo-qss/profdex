@@ -2,19 +2,22 @@ import { onUnmounted, ref } from 'vue'
 
 let scriptLoaded = false
 
-function loadMindAR() {
-  if (scriptLoaded) return Promise.resolve()
+function loadScript(src) {
   return new Promise((resolve, reject) => {
     const script = document.createElement('script')
-    script.src = 'https://cdn.jsdelivr.net/npm/mindar-image-three@latest/prod.js'
+    script.src = src
     script.crossOrigin = 'anonymous'
-    script.onload = () => {
-      scriptLoaded = true
-      resolve()
-    }
-    script.onerror = () => reject(new Error('Falha ao carregar MindAR'))
+    script.onload = resolve
+    script.onerror = () => reject(new Error(`Falha ao carregar: ${src}`))
     document.head.appendChild(script)
   })
+}
+
+async function loadMindAR() {
+  if (scriptLoaded) return
+  await loadScript('https://cdn.jsdelivr.net/npm/three@0.140.0/build/three.min.js')
+  await loadScript('https://cdn.jsdelivr.net/npm/mind-ar@1.1.5/dist/mindar-image-three.prod.js')
+  scriptLoaded = true
 }
 
 export function useAR(containerRef, mindFile, maxTrack = 1) {

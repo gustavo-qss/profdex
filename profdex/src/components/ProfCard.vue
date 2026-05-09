@@ -46,16 +46,7 @@ const cartoonSrc = `/professors/${props.professor.slug}-cartoon.png`
         </template>
 
         <template v-else-if="professor.discovered">
-          <img
-            v-if="!imgError"
-            :src="cartoonSrc"
-            :alt="professor.name"
-            class="avatar-img avatar-img--shadow"
-            @error="imgError = true"
-          />
-          <div v-else class="avatar-fallback avatar-fallback--shadow">
-            {{ professor.name[0] }}
-          </div>
+          <div class="avatar-silhouette">👤</div>
           <div class="discovered-badge">!</div>
         </template>
 
@@ -68,7 +59,7 @@ const cartoonSrc = `/professors/${props.professor.slug}-cartoon.png`
 
       <div class="prof-card__name">
         <span v-if="professor.captured">{{ professor.name }}</span>
-        <span v-else-if="professor.discovered" class="name-blur">████████</span>
+        <span v-else-if="professor.discovered">{{ professor.name }}</span>
         <span v-else class="pixel" style="font-size: 8px; color: var(--text-muted)">???</span>
       </div>
 
@@ -130,12 +121,6 @@ const cartoonSrc = `/professors/${props.professor.slug}-cartoon.png`
   border: 2px solid var(--yellow);
 }
 
-.avatar-img--shadow {
-  filter: brightness(0) contrast(1);
-  border-color: var(--border);
-  opacity: 0.6;
-}
-
 .avatar-fallback {
   width: 64px;
   height: 64px;
@@ -150,9 +135,17 @@ const cartoonSrc = `/professors/${props.professor.slug}-cartoon.png`
   border: 2px solid var(--yellow);
 }
 
-.avatar-fallback--shadow {
-  filter: brightness(0.25);
-  border-color: var(--border);
+.avatar-silhouette {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: #1a1a3a;
+  border: 2px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  filter: grayscale(1) opacity(0.7);
 }
 
 .avatar-unknown {
@@ -208,12 +201,6 @@ const cartoonSrc = `/professors/${props.professor.slug}-cartoon.png`
   min-height: 18px;
 }
 
-.name-blur {
-  color: transparent;
-  text-shadow: 0 0 8px rgba(255,255,255,0.35);
-  letter-spacing: -1px;
-  user-select: none;
-}
 
 .prof-card__status {
   font-size: 7px;
